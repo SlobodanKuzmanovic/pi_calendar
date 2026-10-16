@@ -1,0 +1,9 @@
+[Unit]
+Description=Render the Pi Calendar dashboard image
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/pi/pi_calendar
+ExecStart=/usr/bin/python3 /home/pi/pi_calendar/dashboard/main.py

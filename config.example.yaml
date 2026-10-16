@@ -1,0 +1,30 @@
+# Copy this file to config.yaml and fill in your own values.
+# config.yaml is listed in .gitignore — never commit your real credentials.
+
+calendars:
+  - name: "personal"          # label shown on the dashboard
+    url: "https://example.com/your-personal-calendar.ics"
+    color: "#26C6AA"          # hex color for this source's dots/bars
+  # Add more sources as you reach later rollout phases — no code change needed,
+  # just add another entry here:
+  # - name: "google"
+  #   url: "https://calendar.google.com/calendar/ical/.../basic.ics"
+  #   color: "#4285F4"
+  # - name: "yahoo"
+  #   url: "https://calendar.yahoo.com/.../ical"
+  #   color: "#AB47BC"
+  # - name: "work"
+  #   url: "https://outlook.office365.com/owa/calendar/.../calendar.ics"
+  #   color: "#FFA726"
+
+microsoft_todo:
+  # Created via an Azure AD app registration using the device-code flow
+  # (no client secret needed/stored) — see docs/PLAN.md for the exact steps.
+  client_id: "YOUR_AZURE_APP_CLIENT_ID"
+  list_name: ""   # leave blank for the default "Tasks" list
+
+display:
+  width: 1366     # set to your monitor's native resolution
+  height: 768
+  refresh_minutes: 5
+  theme: "dark"

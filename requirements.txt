@@ -1,0 +1,5 @@
+Pillow
+icalendar
+recurring-ical-events
+msal
+requests

@@ -1,0 +1,9 @@
+[Unit]
+Description=Run the Pi Calendar render script on a schedule
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

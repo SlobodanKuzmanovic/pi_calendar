@@ -1,0 +1,15 @@
+# Real config — contains your personal ICS URLs and API credentials
+config.yaml
+
+# Cached OAuth tokens
+token_cache.json
+*.token
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Generated at runtime — not something to version control
+dashboard/current.png

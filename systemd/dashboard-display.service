@@ -1,0 +1,12 @@
+[Unit]
+Description=Display the Pi Calendar dashboard image on the framebuffer
+After=dashboard-render.service
+
+[Service]
+ExecStart=/usr/bin/fbi -T 1 -a --noverbose -d /dev/fb0 /home/pi/pi_calendar/dashboard/current.png
+Restart=always
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
