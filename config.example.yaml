@@ -24,7 +24,7 @@ microsoft_todo:
   list_name: ""   # leave blank for the default "Tasks" list
 
 display:
-  width: 1366     # set to your monitor's native resolution
-  height: 768
+  width: 1920     # set to your monitor's native resolution
+  height: 1080
   refresh_minutes: 5
   theme: "dark"

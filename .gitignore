@@ -13,3 +13,4 @@ venv/
 
 # Generated at runtime — not something to version control
 dashboard/current.png
+dashboard/current.png.tmp.png

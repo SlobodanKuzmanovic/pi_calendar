@@ -72,19 +72,25 @@ Publishing this as a public template repo — so someone else could clone it, sw
 - **A LICENSE file** (something permissive like MIT is typical for a hobby project like this) so others know they're free to use and modify it.
 - **A short "getting your own credentials" guide** for each source (how to get a Google/Outlook/Yahoo ICS link, how to register an Azure app for Graph API access) — again, content we've already worked out in this conversation.
 
-**Status: repo skeleton is done.** This repo (`pi_calendar`, connected to `https://github.com/SlobodanKuzmanovic/pi_calendar`) now has: `README.md`, `LICENSE` (MIT), `.gitignore`, `requirements.txt`, `config.example.yaml`, the three `systemd/` unit files, a `screenshots/dashboard-preview.png`, and a `dashboard/main.py` placeholder with the TODO breakdown for Phase 1. None of it is committed to git yet — that's one of the open items below. What's left is entirely the real implementation (Phase 1) and later phases, not packaging.
+**Status: repo scaffold + real implementation done, pushed and committed.** This repo (`pi_calendar`, connected to `https://github.com/SlobodanKuzmanovic/pi_calendar`) now has: `README.md`, `LICENSE` (MIT), `.gitignore`, `requirements.txt` (Pillow, icalendar, recurring-ical-events, msal, requests, PyYAML), `config.example.yaml`, the three `systemd/` unit files, `screenshots/dashboard-preview.png`, and a working `dashboard/main.py` (load_config, fetch_calendars, fetch_todo, render, main — tested locally, degrades gracefully with no config/credentials). The dark-theme WorkSans fonts used by the approved mockup are bundled at `dashboard/fonts/` so the script doesn't depend on fonts being present on the Pi. SD card is reflashed with Raspberry Pi OS Lite (32-bit), SSH + Wi-Fi configured. Microsoft account setup (personal ICS link + Azure app registration, device-code flow, Tasks.ReadWrite) is complete — both the ICS URL and the Application (client) ID are collected and ready to go into `config.yaml` on the Pi.
+
+What's left is entirely the on-Pi setup and first real run (Phase 1), not more code or scaffolding.
 
 ## Open items
 
-- [ ] Review the scaffolded repo files (README, config.example.yaml, systemd units, LICENSE) and adjust anything that doesn't match preference
-- [ ] `git add` + commit + push the scaffolded files to GitHub
-- [ ] Confirm the laptop monitor's native resolution (needed to size the generated image correctly, and to update `config.example.yaml`'s `display.width`/`height` — current mockups use 1366×768 as a placeholder)
-- [ ] Reflash the SD card to a current Raspberry Pi OS Lite release; enable SSH + Wi-Fi via Raspberry Pi Imager
-- [ ] Get the personal Microsoft account's ICS calendar link (Outlook.com → Settings → Share calendars)
-- [ ] Register an Azure AD app for Microsoft Graph access (To Do), using the device-code flow (no client secret needed)
-- [ ] Write the real `dashboard/main.py`: `load_config`, `fetch_calendars` (icalendar + recurring-ical-events), `fetch_todo` (msal device-code flow + Graph API), `render` (adapt the approved mockup rendering code to real data + the confirmed resolution)
-- [ ] `git clone` the repo onto the Pi, `pip install -r requirements.txt`, copy `config.example.yaml` to `config.yaml` and fill in real values
-- [ ] Install `fbi` (`sudo apt install fbi`), copy the `systemd/` unit files into `/etc/systemd/system/`, enable + start them
+- [x] Review the scaffolded repo files
+- [x] `git add` + commit + push the scaffolded files to GitHub
+- [x] Confirm the laptop monitor's native resolution — 1920×1080, already set in `config.example.yaml`
+- [x] Reflash the SD card to Raspberry Pi OS Lite (32-bit); SSH + Wi-Fi enabled via Raspberry Pi Imager
+- [x] Get the personal Microsoft account's ICS calendar link (Outlook.com → Settings → Shared calendars → Publish a calendar)
+- [x] Register an Azure app for Microsoft Graph access (To Do): "Personal Microsoft accounts", Allow public client flows: Enabled, Tasks.ReadWrite delegated permission added, Application (client) ID collected
+- [x] Write the real `dashboard/main.py` — implemented and tested locally (renders correctly with and without real data)
+- [ ] SSH into the Pi; `git clone https://github.com/SlobodanKuzmanovic/pi_calendar.git`, `cd pi_calendar`
+- [ ] `sudo apt update && sudo apt install -y python3-pip fbi`
+- [ ] `pip install -r requirements.txt --break-system-packages` (or use a venv)
+- [ ] `cp config.example.yaml config.yaml` and fill in the real ICS URL and Azure client ID
+- [ ] Run `python3 dashboard/main.py` manually once, complete the one-time device-code sign-in (open the printed URL + code on any device, sign in with the personal Microsoft account), confirm `dashboard/current.png` is created and looks right
+- [ ] Copy the `systemd/` unit files into `/etc/systemd/system/`, `sudo systemctl daemon-reload`, enable + start `dashboard-render.timer` and `dashboard-display.service`
 - [ ] Verify the dashboard renders correctly and survives a reboot — Phase 1 complete
 - [ ] Add Google + Yahoo calendars to `config.yaml` — Phase 2 (no code change needed)
 - [ ] Add work Microsoft 365 calendar — Phase 3 (where the admin-consent / ICS-policy risk gets tested)
