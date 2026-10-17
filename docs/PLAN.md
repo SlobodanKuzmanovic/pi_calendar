@@ -72,7 +72,7 @@ Publishing this as a public template repo — so someone else could clone it, sw
 - **A LICENSE file** (something permissive like MIT is typical for a hobby project like this) so others know they're free to use and modify it.
 - **A short "getting your own credentials" guide** for each source (how to get a Google/Outlook/Yahoo ICS link, how to register an Azure app for Graph API access) — again, content we've already worked out in this conversation.
 
-**Status: repo scaffold + real implementation done, pushed and committed.** This repo (`pi_calendar`, connected to `https://github.com/SlobodanKuzmanovic/pi_calendar`) now has: `README.md`, `LICENSE` (MIT), `.gitignore`, `requirements.txt` (Pillow, icalendar, recurring-ical-events, msal, requests, PyYAML), `config.example.yaml`, the three `systemd/` unit files, `screenshots/dashboard-preview.png`, and a working `dashboard/main.py` (load_config, fetch_calendars, fetch_todo, render, main — tested locally, degrades gracefully with no config/credentials). The dark-theme WorkSans fonts used by the approved mockup are bundled at `dashboard/fonts/` so the script doesn't depend on fonts being present on the Pi. SD card is reflashed with Raspberry Pi OS Lite (32-bit), SSH + Wi-Fi configured. Microsoft account setup (personal ICS link + Azure app registration, device-code flow, Tasks.ReadWrite) is complete — both the ICS URL and the Application (client) ID are collected and ready to go into `config.yaml` on the Pi.
+**Status: Phase 1 complete and confirmed working on the physical display.** This repo (`pi_calendar`, connected to `https://github.com/SlobodanKuzmanovic/pi_calendar`) now has: `README.md`, `LICENSE` (MIT), `.gitignore`, `requirements.txt` (Pillow, icalendar, recurring-ical-events, msal, requests, PyYAML), `config.example.yaml`, the three `systemd/` unit files, `screenshots/dashboard-preview.png`, and a working `dashboard/main.py` (load_config, fetch_calendars, fetch_todo, render, main — tested locally, degrades gracefully with no config/credentials). The dark-theme WorkSans fonts used by the approved mockup are bundled at `dashboard/fonts/` so the script doesn't depend on fonts being present on the Pi. SD card is reflashed with Raspberry Pi OS Lite (32-bit), SSH + Wi-Fi configured. Microsoft account setup (personal ICS link + Azure app registration, device-code flow, Tasks.ReadWrite) is complete — both the ICS URL and the Application (client) ID are collected and ready to go into `config.yaml` on the Pi.
 
 What's left is entirely the on-Pi setup and first real run (Phase 1), not more code or scaffolding.
 
@@ -85,13 +85,21 @@ What's left is entirely the on-Pi setup and first real run (Phase 1), not more c
 - [x] Get the personal Microsoft account's ICS calendar link (Outlook.com → Settings → Shared calendars → Publish a calendar)
 - [x] Register an Azure app for Microsoft Graph access (To Do): "Personal Microsoft accounts", Allow public client flows: Enabled, Tasks.ReadWrite delegated permission added, Application (client) ID collected
 - [x] Write the real `dashboard/main.py` — implemented and tested locally (renders correctly with and without real data)
-- [ ] SSH into the Pi; `git clone https://github.com/SlobodanKuzmanovic/pi_calendar.git`, `cd pi_calendar`
-- [ ] `sudo apt update && sudo apt install -y python3-pip fbi`
-- [ ] `pip install -r requirements.txt --break-system-packages` (or use a venv)
-- [ ] `cp config.example.yaml config.yaml` and fill in the real ICS URL and Azure client ID
-- [ ] Run `python3 dashboard/main.py` manually once, complete the one-time device-code sign-in (open the printed URL + code on any device, sign in with the personal Microsoft account), confirm `dashboard/current.png` is created and looks right
-- [ ] Copy the `systemd/` unit files into `/etc/systemd/system/`, `sudo systemctl daemon-reload`, enable + start `dashboard-render.timer` and `dashboard-display.service`
-- [ ] Verify the dashboard renders correctly and survives a reboot — Phase 1 complete
+- [x] SSH into the Pi; `git clone https://github.com/SlobodanKuzmanovic/pi_calendar.git`, `cd pi_calendar`
+- [x] `sudo apt update && sudo apt install -y python3-pip fbi`
+- [x] `sudo pip3 install -r requirements.txt --break-system-packages` (must be system-wide/sudo — the display/render services run as root and won't see packages installed into a regular user's own site-packages)
+- [x] `cp config.example.yaml config.yaml` and fill in the real ICS URL and Azure client ID
+- [x] Run `python3 dashboard/main.py` manually once, complete the one-time device-code sign-in, confirm `dashboard/current.png` is created and looks right
+- [x] Copy the `systemd/` unit files into `/etc/systemd/system/`, `sudo systemctl daemon-reload`, enable + start `dashboard-render.timer` and `dashboard-display.service`
+- [x] `sudo systemctl disable --now getty@tty1.service` (the default login prompt on tty1 fights `fbi` for the console)
+- [x] Verify the dashboard renders correctly on the actual monitor — Phase 1 complete
+
+### Pi deployment gotchas hit (now fixed in the repo's systemd files and docs)
+
+- systemd unit files originally assumed username "pi" — updated to the actual username "calendar" once the Pi was set up. Anyone using a different username needs to edit the paths in `systemd/*.service`.
+- `fbi` run under systemd exits almost immediately without a real controlling terminal attached, and with `Restart=always` this crash-loops and corrupts the framebuffer (symptom: screen shows nothing or goes solid black after many restarts). Fixed by giving the service `StandardInput=tty` / `StandardOutput=tty` / `TTYPath=/dev/tty1`, and — since `fbi` can still exit shortly after drawing the image even with those set — wrapping `ExecStart` as `fbi ...; exec tail -f /dev/null` so the service stays "running" (and systemd stops restarting it) once the image is on screen.
+- Raspberry Pi OS's console idle screen-blanking can blank tty1 regardless of what's on it. If the screen goes black after a while even with the display service stable, disable it: `sudo raspi-config nonint do_blanking 1` and/or add `consoleblank=0` to `/boot/cmdline.txt`.
+- `pip install --break-system-packages` without `sudo` installs to the invoking user's own site-packages, invisible to the systemd services which run as root — install with `sudo pip3 install ...` instead.
 - [ ] Add Google + Yahoo calendars to `config.yaml` — Phase 2 (no code change needed)
 - [ ] Add work Microsoft 365 calendar — Phase 3 (where the admin-consent / ICS-policy risk gets tested)
 - [ ] Decide on optional extras (weather, motion sensor, etc.) or keep it minimal — Phase 4

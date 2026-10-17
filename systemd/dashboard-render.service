@@ -1,3 +1,6 @@
+# NOTE: paths below assume the Pi user account is named "calendar".
+# If you used a different username during setup (Raspberry Pi Imager no
+# longer defaults to "pi"), replace /home/calendar/ with your own home dir.
 [Unit]
 Description=Render the Pi Calendar dashboard image
 After=network-online.target
@@ -5,5 +8,5 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/pi/pi_calendar
-ExecStart=/usr/bin/python3 /home/pi/pi_calendar/dashboard/main.py
+WorkingDirectory=/home/calendar/pi_calendar
+ExecStart=/usr/bin/python3 /home/calendar/pi_calendar/dashboard/main.py

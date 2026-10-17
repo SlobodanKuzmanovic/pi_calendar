@@ -1,12 +1,32 @@
+# NOTE: paths below assume the Pi user account is named "calendar".
+# If you used a different username during setup, replace /home/calendar/
+# with your own home dir.
+#
+# Before enabling this service, disable the default login prompt on
+# tty1 so it doesn't fight fbi for the console:
+#   sudo systemctl disable --now getty@tty1.service
+#
+# If the screen still goes black after a while, Raspberry Pi OS's console
+# idle screen-blanking may be kicking in. Disable it with:
+#   sudo raspi-config nonint do_blanking 1
+# and/or add "consoleblank=0" to /boot/cmdline.txt.
 [Unit]
 Description=Display the Pi Calendar dashboard image on the framebuffer
 After=dashboard-render.service
 
 [Service]
-ExecStart=/usr/bin/fbi -T 1 -a --noverbose -d /dev/fb0 /home/pi/pi_calendar/dashboard/current.png
-Restart=always
-StandardOutput=null
-StandardError=null
+# fbi can exit shortly after drawing the image when run under systemd
+# without a real interactive terminal attached. Rather than fight that,
+# we let it draw once and then keep the service "running" with a no-op
+# so systemd doesn't restart-loop fbi (which corrupts the framebuffer
+# if it happens repeatedly). The image stays on screen because nothing
+# else touches /dev/fb0 or switches the console away from tty1.
+ExecStart=/bin/sh -c '/usr/bin/fbi -T 1 -a --noverbose -d /dev/fb0 /home/calendar/pi_calendar/dashboard/current.png; exec tail -f /dev/null'
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/tty1
+Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
